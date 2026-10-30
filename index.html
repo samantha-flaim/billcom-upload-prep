@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Bill.com Upload Prep</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;112,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one working column, read top to bottom like a reimbursement packet: intake tray, review sheet, hand-off to Bill.com. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --surface-2: #e9edf3;
+  --ink: #15213a;
+  --muted: #5a6478;
+  --line: #d6dce6;
+  --accent: #14695a;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3f1ed;
+  --good: #1d7a49;
+  --good-soft: #e4f3ea;
+  --warn: #a35f00;
+  --warn-soft: #fbf0dc;
+  --bad: #b8312b;
+  --bad-soft: #fbe6e4;
+  --info: #536079;
+  --info-soft: #e8ecf3;
+  --focus: #2f6fe4;
+  --paper: #ffffff;
+  --paper-ink: #111111;
+  --paper-rule: #c9c9c9;
+  --paper-fill: #e8e8e8;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131d; --surface: #161d2a; --surface-2: #1e2737; --ink: #e6ebf4; --muted: #9aa4b8; --line: #2a3447;
+    --accent: #3bb39a; --accent-ink: #06231d; --accent-soft: #14322c;
+    --good: #4cc38a; --good-soft: #12301f; --warn: #e3a64c; --warn-soft: #33260f; --bad: #f2736c; --bad-soft: #3a1817;
+    --info: #a7b2c7; --info-soft: #222b3b; --focus: #7aa7ff; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131d; --surface: #161d2a; --surface-2: #1e2737; --ink: #e6ebf4; --muted: #9aa4b8; --line: #2a3447;
+  --accent: #3bb39a; --accent-ink: #06231d; --accent-soft: #14322c;
+  --good: #4cc38a; --good-soft: #12301f; --warn: #e3a64c; --warn-soft: #33260f; --bad: #f2736c; --bad-soft: #3a1817;
+  --info: #a7b2c7; --info-soft: #222b3b; --focus: #7aa7ff; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 900px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 112%; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(26px, 5vw, 36px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+h2 { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
+p { margin: 0; }
+.mono, input.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Header */
+.top { padding-block: 40px 24px; display: grid; gap: 10px; }
+.lede { max-width: 62ch; color: var(--muted); font-size: 16px; }
+.privacy { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.privacy svg { flex: none; }
+
+.rule { border: 0; border-top: 1px solid var(--line); margin: 6px 0 0; }
+
+/* Steps, each with an "i" bubble; its note opens under the row on hover, focus or tap */
+.steps { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13px; color: var(--muted); position: relative; }
+.tip { display: inline-flex; }
+.ib { width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--muted); background: transparent; color: var(--muted);
+  font: italic 700 11px/1 Georgia, "Times New Roman", serif; display: grid; place-items: center; padding: 0; cursor: help; }
+.ib:hover, .ib:focus-visible { border-color: var(--accent); color: var(--accent); }
+.tipbox { position: absolute; left: 0; top: calc(100% + 8px); z-index: 20; width: min(460px, 100%); padding: 12px 14px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-weight: 400; line-height: 1.5;
+  box-shadow: 0 12px 28px -14px rgba(10, 20, 40, .35); opacity: 0; visibility: hidden; transition: opacity .12s; }
+.tip:hover .tipbox, .tip:focus-within .tipbox { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .tipbox { transition: none; } }
+.steps li { display: flex; align-items: center; gap: 8px; }
+.steps .n { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 12px; }
+.steps li.now { color: var(--ink); font-weight: 600; }
+.steps li.now .n { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.steps li.done .n { border-color: var(--accent); color: var(--accent); }
+
+/* Panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.stack { display: grid; gap: 16px; }
+
+/* Intake */
+.intake { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.drop { border: 2px dashed var(--line); border-radius: var(--radius); background: var(--surface); min-height: 260px; display: grid;
+  place-items: center; text-align: center; padding: 28px 20px; cursor: pointer; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop .big { font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: 20px; }
+.drop .inner { display: grid; gap: 10px; justify-items: center; max-width: 36ch; }
+.drop svg { color: var(--accent); }
+.drop.busy { cursor: progress; }
+
+.btn { font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 16px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn.small { padding: 6px 10px; font-size: 13px; }
+.btn.ghost { background: transparent; }
+.linkbtn { font: inherit; background: none; border: 0; color: var(--accent); font-weight: 600; cursor: pointer; padding: 0; }
+
+/* Example paper */
+.example { display: grid; gap: 10px; align-content: start; }
+.example .tag { justify-self: start; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  background: var(--surface-2); padding: 3px 8px; border-radius: 999px; }
+.paper { background: var(--paper); color: var(--paper-ink); border: 1px solid var(--line); border-radius: 4px; aspect-ratio: 8.5 / 11; max-width: 100%;
+  padding: 7% 7.5%; font-family: Helvetica, Arial, sans-serif; font-size: clamp(6px, 1.25vw, 8.5px); line-height: 1.35;
+  box-shadow: 0 10px 24px -18px rgba(10, 20, 40, .45); overflow: hidden; }
+.paper .pt { font-weight: 700; font-size: 1.9em; line-height: 1.1; margin-bottom: 1.4em; }
+.paper .hg { display: grid; grid-template-columns: auto 1fr auto auto; gap: .35em 1em; margin-bottom: 1.2em; }
+.paper b { font-weight: 700; }
+.paper table { width: 100%; border-collapse: collapse; }
+.paper th { background: var(--paper-fill); text-align: left; padding: .5em; font-weight: 700; }
+.paper td { padding: .5em; border-bottom: .5px solid var(--paper-rule); }
+.paper .r { text-align: right; }
+.paper tr.t td { border-top: 1.2px solid var(--paper-ink); border-bottom: 0; font-weight: 700; }
+.paper .bd { margin-bottom: 1.2em; }
+.example .cap { font-size: 13px; color: var(--muted); }
+
+.howto ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.note { font-size: 13px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+
+/* Review */
+.summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.summary .file { display: grid; gap: 2px; min-width: 0; }
+.summary .fname { font-weight: 600; overflow-wrap: anywhere; }
+.pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 13px; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.checks li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 10px; border-radius: 6px; }
+.checks li .ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; margin-top: 2px; }
+.checks li.good .ic { background: var(--good-soft); color: var(--good); }
+.checks li.warn { background: var(--warn-soft); }
+.checks li.warn .ic { background: var(--warn); color: var(--surface); }
+.checks li.bad { background: var(--bad-soft); }
+.checks li.bad .ic { background: var(--bad); color: var(--surface); }
+.checks li.info .ic { background: var(--info-soft); color: var(--info); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .good { color: var(--good); } .legend .warn { color: var(--warn); } .legend .bad { color: var(--bad); } .legend .info { color: var(--info); }
+
+.field { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.field label { font-size: 13px; font-weight: 600; }
+.field .hint { font-size: 12px; color: var(--muted); }
+.req { color: var(--bad); font-weight: 700; }
+input[type="text"], input[type="date"], textarea, select {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 9px 11px; width: 100%; min-width: 0;
+}
+input:focus, textarea:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent); }
+input.invalid, select.invalid, textarea.invalid { border-color: var(--bad); background: var(--bad-soft); }
+select:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  table.lines { min-width: 640px; } table.lines td.acct { width: 210px; } table.lines td.amt { width: 100px; } table.lines td.n { width: 26px; } }
+
+.desc-row { display: flex; gap: 8px; }
+.desc-row input, .desc-row textarea { flex: 1; min-width: 0; }
+textarea { resize: vertical; line-height: 1.45; }
+.desc-box { border: 1.5px solid var(--accent); background: var(--accent-soft); border-radius: var(--radius); padding: 16px; display: grid; gap: 16px; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.lines { width: 100%; border-collapse: collapse; min-width: 720px; }
+table.lines th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted);
+  background: var(--surface-2); padding: 8px 10px; }
+table.lines td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: middle; }
+table.lines td.n { color: var(--muted); font-family: var(--font-mono); font-size: 13px; width: 32px; text-align: center; }
+table.lines td.acct { width: 250px; }
+table.lines td.amt { width: 130px; }
+table.lines td.amt input { text-align: right; }
+table.lines td.x { width: 44px; text-align: center; }
+table.lines tfoot td { font-weight: 600; background: var(--surface-2); }
+.xbtn { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px 8px; border-radius: 6px; }
+.xbtn:hover { color: var(--bad); background: var(--bad-soft); }
+.rowbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+
+.download { display: grid; gap: 12px; }
+.download .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.download .why { font-size: 13px; color: var(--muted); }
+.msg { font-size: 14px; padding: 10px 12px; border-radius: 8px; }
+.msg.good { background: var(--good-soft); color: var(--good); }
+.msg.bad { background: var(--bad-soft); color: var(--bad); }
+.msg.info { background: var(--info-soft); color: var(--info); }
+.msg a { color: inherit; font-weight: 600; }
+.next ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+
+footer { margin-top: 32px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); animation: sp .8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } .drop { transition: none; } }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Make an AI Club Reimbursement Bill.com-ready</h1>
+    <p class="lede">Turn a member's SBC Reimbursement / Invoice Form PDF into one file which requires no additional steps in Bill.com other than uploading.</p>
+    <hr class="rule">
+    <p class="msg info" id="viewNote" hidden>Saving the finished PDF isn't available in this view of the page. Use the website version instead, which saves normally: <a href="https://samantha-flaim.github.io/billcom-upload-prep/" target="_blank" rel="noopener">samantha-flaim.github.io/billcom-upload-prep</a></p>
+  </header>
+
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li class="now" data-step="1"><span class="n">1</span>Add the PDF
+      <span class="tip"><button class="ib" type="button" aria-label="More about step 1" aria-describedby="tip1">i</button>
+      <span class="tipbox" role="tooltip" id="tip1"><b>Add the PDF.</b> Drop in the PDF the member sent you: the SBC form plus receipts, as one file. The tool reads the WGA form and checks it against the receipts. The PDF never leaves your computer.</span></span>
+    </li>
+    <li data-step="2"><span class="n">2</span>Review and add a description
+      <span class="tip"><button class="ib" type="button" aria-label="More about step 2" aria-describedby="tip2">i</button>
+      <span class="tipbox" role="tooltip" id="tip2"><b>Review.</b> Fix anything flagged in red, pick any missing club or account from the WGA lists, type a short bill description, and check the approval note.</span></span>
+    </li>
+    <li data-step="3"><span class="n">3</span>Download and upload to Bill.com
+      <span class="tip"><button class="ib" type="button" aria-label="More about step 3" aria-describedby="tip3">i</button>
+      <span class="tipbox" role="tooltip" id="tip3"><b>Upload.</b> Download the new PDF and upload it in Bill.com's Enter a bill on the same day (the invoice and due dates are set to the day you download). Bill.com fills in the vendor, invoice number, dates, amount, and each line's account and class. Check the bill description and Notes on this bill, then click Create bill.</span></span>
+    </li>
+  </ol>
+
+  <main>
+    <!-- Intake -->
+    <section id="intake" class="stack">
+      <div class="intake">
+        <label class="drop" id="drop" for="file">
+          <span class="inner">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v6"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg>
+            <span class="big" id="dropTitle">Drop the member's PDF here</span>
+            <span class="muted" id="dropSub">The SBC form plus receipts, as one PDF.</span>
+          </span>
+        </label>
+        <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+      </div>
+    </section>
+
+    <!-- Review -->
+    <section id="review" class="stack" hidden>
+      <div class="panel">
+        <div class="summary">
+          <div class="file">
+            <span class="fname" id="sumFile"></span>
+            <span class="muted mono" id="sumMeta"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span class="pill" id="sumPill"><span class="dot"></span><span id="sumPillText"></span></span>
+            <button class="btn small ghost" id="restart" type="button">Start over</button>
+          </div>
+        </div>
+        <ul class="checks" id="checks"></ul>
+        <div class="legend" aria-hidden="true">
+          <span><span class="dot bad"></span>Needs fixing</span>
+          <span><span class="dot warn"></span>Worth a look</span>
+          <span><span class="dot info"></span>Check by eye</span>
+          <span><span class="dot good"></span>Looks right</span>
+        </div>
+      </div>
+
+      <div class="desc-box">
+        <div class="field">
+          <label for="billDesc">Bill description <span class="req" aria-hidden="true">*</span><span class="muted" style="font-weight:400"> (required)</span></label>
+          <input type="text" id="billDesc" maxlength="200" placeholder="e.g. WHALASA BBQ Event Supplies" autocomplete="off">
+          <span class="hint">A short name for the whole bill. It goes on the summary page, and you'll paste it into Bill.com's Bill description field.</span>
+        </div>
+        <div class="field">
+          <label for="apprNote">Approval note <span class="req" aria-hidden="true">*</span><span class="muted" style="font-weight:400"> (required)</span></label>
+          <textarea id="apprNote" rows="2" maxlength="500" placeholder="I approve this expense on behalf of my club / conference.&#10;Name, Title, email@wharton.upenn.edu, Club"></textarea>
+          <span class="hint">Analytics (461) uses its standard note; other clubs get the Approval Note from their form. It goes on the summary page as Notes, for Bill.com's Notes on this bill.</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Bill details</h2>
+        <div class="grid2">
+          <div class="field">
+            <label for="vendor">Vendor (Pay to the order of)</label>
+            <input type="text" id="vendor" autocomplete="off">
+            <span class="hint">Must match the vendor's name in Bill.com.</span>
+          </div>
+          <div class="field">
+            <label for="club">Club (Class)</label>
+            <select id="club"></select>
+            <span class="hint">From the WGA club list. Bill.com gets the club code as the Class.</span>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="invNum">Bill.com invoice number</label>
+            <input type="text" id="invNum" class="mono" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="invDate">Invoice and due date</label>
+            <input type="date" id="invDate">
+            <span class="hint">Defaults to today. Bill.com uses this for both dates.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="rowbar">
+          <h2>Expense lines</h2>
+          <span class="muted" style="font-size:13px">Pick a missing account from the WGA list. Bill.com gets the 4-digit code, and each line gets Class <span class="mono" id="classEcho"></span>.</span>
+        </div>
+        <div class="tablewrap">
+          <table class="lines">
+            <thead><tr><th>#</th><th>Description</th><th>Account</th><th style="text-align:right">Amount</th><th><span class="vh">Remove</span></th></tr></thead>
+            <tbody id="lineBody"></tbody>
+            <tfoot><tr><td></td><td>Total of lines</td><td></td><td class="mono" style="text-align:right" id="lineSum"></td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="rowbar">
+          <button class="btn small" id="addLine" type="button">+ Add a line</button>
+          <span class="muted mono" style="font-size:13px" id="formTotalNote"></span>
+        </div>
+      </div>
+
+      <div class="panel download">
+        <h2>Download for Bill.com</h2>
+        <div class="bar">
+          <button class="btn primary" id="dlBtn" type="button" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+            Download PDF
+          </button>
+          <span class="mono muted" id="dlName"></span>
+        </div>
+        <p class="why" id="dlWhy"></p>
+        <div id="dlMsg" hidden></div>
+      </div>
+
+      <div class="panel next" id="next" hidden>
+        <h2>Next, in Bill.com</h2>
+        <ol>
+          <li>Open <b>Enter a bill</b> and upload <span class="mono" id="nextName"></span>.</li>
+          <li>Wait for the banner that says Bill.com filled in the bill from the document.</li>
+          <li>Paste the bill description:
+            <div class="desc-row" style="margin-top:6px">
+              <input type="text" id="copySrc" readonly class="mono" aria-label="Bill description to paste">
+              <button class="btn small" data-copy="copySrc" type="button">Copy</button>
+            </div>
+          </li>
+          <li>Check that <b>Notes on this bill</b> has the approval note. If it's empty, paste it:
+            <div class="desc-row" style="margin-top:6px">
+              <textarea id="copyNote" readonly rows="2" class="mono" aria-label="Approval note to paste"></textarea>
+              <button class="btn small" data-copy="copyNote" type="button" style="align-self:start">Copy</button>
+            </div>
+          </li>
+          <li>Check that each expense line has the right account and class, then click <b>Create bill</b>.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built for the WGA SBC Reimbursement / Invoice Form exported from Excel.</p>
+    <p>If WGA changes the form's layout, this reader may need an update.</p>
+  </footer>
+</div>
+
+<script>
+/* ---- core: read the WGA SBC form + receipts, build the Bill.com packet ----
+   No DOM access in here, so the same code runs in the page and in tests.
+   Needs: pdfjs (getDocument) and PDFLib (pdf-lib) objects passed in. */
+
+/* ---- WGA dropdown lists, copied once from the Lists tab of "Reimbursement Form 2026" ---- */
+const WGA_CLUBS = `AAMBAA|302
+Adam Smith Society|666
+Aerospace & Defense|479
+Agribusiness|462
+Analytics|461
+Angel Investing|488
+Art|665
+Asia|303
+Australia & New Zealand|304
+Aviation|645
+Badminton|154
+Basketball|102
+Beauty Business|671
+Boxing|129
+Brazil|351
+Brewmasters Guild|651
+California Club|639
+Canada|305
+Cannabis|466
+CARIBIZ (Caribbean Business Initiative)|445
+Catholic|331
+Chocolate Club|653
+Christian Fellowship|306
+Cigar|604
+Cluster 1 - WG 25|1021
+Cluster 2 - WG 25|1022
+Cluster 3 - WG 25|1023
+Cluster 4 - WG 25|1024
+Cluster 1 - WG 26|1121
+Cluster 2 - WG 26|1122
+Cluster 3 - WG 26|1123
+Cluster 4 - WG 26|1124
+Cocktail|660
+Coding Club|471
+Coffee|661
+Comedy|633
+Common Cents|667
+Community Consultants|207
+Conference: Africa Business|519
+Conference: Asia Business|502
+Conference: Business Technology|515
+Conference: China|535
+Conference: Energy|532
+Conference: Entrepreneurship|503
+Conference: Family Business|528
+Conference: Finance|505
+Conference: Future of Cities|554
+Conference: Health Care Business|516
+Conference: Investment Management|513
+Conference: Latin America|514
+Conference: Marketing|531
+Conference: Private Equity|518
+Conference: Real Estate|529
+Conference: Restructuring|527
+Conference: Retail|549
+Conference: Spain|553
+Conference: WWIB|549
+Consulting|402
+Corporate Law & Public Policy|489
+Crew & Rowing|104
+Dance Studio|607
+DEAL|678
+Dealmakers|454
+Digital Health|460
+E-sports and Gaming|673
+Education|472
+Energy|406
+Entrepreneurship|407
+Entrepreneurship Through Acquisition|476
+Equestrian|108
+European|308
+Family Business|425
+Fashion Show|319
+Femtech|482
+Fight Night|141
+Film|609
+Finance|408
+FinTech|463
+Fit Club|142
+Follies|606
+Food Club|605
+Founders Club|473
+French Association|336
+General Management|446
+German|353
+Global Healthcare Volunteers Program|226
+Golf|109
+Graduate Retail Club|449
+Greater China|309
+GUIDE|202
+Healthcare|409
+Human Capital|464
+India|311
+India Economic Forum|510
+Innovation and Design|458
+Investment Management|412
+Israel|321
+Italian|355
+JAMBA (Jewish Association of MBAs)|313
+Japan|312
+Korea|314
+LDSSA (Latter-day Saint Student Assoc)|335
+Marketing|414
+MBA Innovation Summit|534
+Media & Entertainment|415
+MENA (Middle East North Africa)|327
+Mens Rugby|113
+Mindfulness|664
+Motorsports|158
+Mountaineering and Outdoors|138
+Music|672
+Muslim Students Network|323
+Non-Traditional|459
+One for the World|231
+Out For Business|315
+Padel Club|157
+Partners|613
+PAWS|669
+PBG (Penn Biotech Group) Healthcare Consulting|411
+Penn Association of Law and Business|456
+Penn Blockchain|469
+Photography|652
+Poker & Gaming|632
+Politics & Public Policy|643
+Private Equity & Venture Capital|422
+PSWiRE|470
+Pub|610
+Public Speaking|436
+Quant Finance|487
+Real Estate|427
+Rebuilding Together|201
+Restructuring|452
+Return on Equality|668
+Roadrunners and Triathletes|112
+Russia and FSU Club|352
+Sailing|114
+Sales|490
+Sales & Trading|430
+Say Yes to Education|204
+Ski and Snowboard Club|136
+Soccer|117
+Social Impact|417
+South Asian American Association (SAAAMBA)|357
+Southeast Asia|316
+Southern Business Association|354
+Sports Business|453
+Squash|118
+Storytellers|663
+Strategy & Board Games Club|670
+Surf & Scuba Club|139
+Sustainable Business Coalition|465
+Techno & House Music|677
+Technology|434
+Tennis|121
+Theatre|662
+Travel & Hospitality|410
+Turkish|356
+Veterans|437
+Volleyball|123
+WAAAM|325
+WASA (African Student Association)|301
+WGA (Wharton Graduate Association)|720
+WHALASA|317
+WHALIP|491
+WHAMBAA|310
+Wharton Global Impact Consultants|203
+Wharton Impact Investing Partners|457
+Wharton Journal|520
+Wharton Kids|612
+Wharton Scotch & Whiskey Club|611
+Wharton Women in Investing|480
+Whartonomous Vehicles|468
+Whitney M. Young|522
+Wildmen Hockey|124
+Wine|615
+Women in Business|440
+Womens Rugby|126
+Yoga & Wellness Club|140`.split("\n").map((l) => { const i = l.lastIndexOf("|"); return { name: l.slice(0, i), code: l.slice(i + 1) }; });
+
+const WGA_ACCOUNTS = `6000|Advance Ticket Purchases
+6010|Cash Prizes & Awards
+6020|Clothing
+6030|Club Equipment
+6040|Club Phone Usage
+6050|Club Related Bank Charges
+6060|Club Related Registrations
+6070|Club Shipping Charges
+6101|Club Internet Usage
+6110|Club Web Development
+6120|Club Web Hosting
+6130|Club Web Maintenance
+6150|Contracted Services
+6160|Outgoing Donations
+6170|Copying Costs
+6180|Event Insurance
+6190|Event Supplies
+6200|Food & Beverages
+6210|Gifts (Non-Cash Awards)
+6216|Outgoing Scholarships/Grants
+6230|Promotional Materials
+6241|Other Rental Fees
+6250|Rental of Conference Facilities
+6260|Security & Housekeeping
+6280|Travel
+*6021|Board Clothing and Merchandise
+*6201|Board Food Expenses
+*6242|Board Rental Expenses
+*6281|Board Travel`.split("\n").map((l) => {
+  const board = l.startsWith("*"), [code, name] = l.replace(/^\*/, "").split("|");
+  return { code, name, board };
+});
+
+function findAccount(code) { return WGA_ACCOUNTS.find((a) => a.code === String(code || "").trim()) || null; }
+function findClub(code, name) {
+  const c = String(code || "").trim(), n = String(name || "").trim().toLowerCase();
+  return (c && WGA_CLUBS.find((k) => k.code === c && k.name.toLowerCase() === n))
+    || (c && WGA_CLUBS.find((k) => k.code === c))
+    || (!c && n && WGA_CLUBS.find((k) => k.name.toLowerCase() === n))
+    || null;
+}
+
+const FORM_TITLE = /WHARTON SBC REIMBURSEMENT/i;
+const RIGHT_LABELS = ["Club Code", "Vendor Invoice", "Number", "[Direct Vendor", "Payments Only]"];
+const PLACEHOLDER = /^\[(Yes or No|Select from list|Direct Vendor)|^board expense\]$|^Payments Only\]$/i;
+
+function money(n) {
+  return "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function parseAmount(s) {
+  const t = String(s || "").replace(/[^0-9.\-]/g, "");
+  if (!t || t === "-" || t === ".") return null;
+  const v = Number(t);
+  return Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
+}
+function parseUSDate(s) {
+  const m = String(s || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (!m) return null;
+  let y = Number(m[3]);
+  if (y < 100) y += 2000;
+  const d = new Date(y, Number(m[1]) - 1, Number(m[2]));
+  return isNaN(d) ? null : d;
+}
+
+async function pageItems(page) {
+  const H = page.view[3];
+  const tc = await page.getTextContent();
+  return tc.items
+    .filter((it) => it.str && it.str.trim())
+    .map((it) => ({ s: it.str.trim(), x: it.transform[4], y: H - it.transform[5], w: it.width }));
+}
+
+function findLabel(items, label, exact = true) {
+  const hits = items.filter((i) => (exact ? i.s === label : i.s.startsWith(label)));
+  hits.sort((a, b) => a.y - b.y);
+  return hits[0] || null;
+}
+
+function valueRightOf(items, label) {
+  const L = findLabel(items, label);
+  if (!L) return "";
+  const sameLine = items.filter((i) => i !== L && Math.abs(i.y - L.y) < 6 && i.x > L.x + L.w);
+  const stops = sameLine.filter((i) => RIGHT_LABELS.includes(i.s)).map((i) => i.x);
+  const stopX = stops.length ? Math.min(...stops) : Infinity;
+  return sameLine
+    .filter((i) => i.x < stopX && !RIGHT_LABELS.includes(i.s) && !PLACEHOLDER.test(i.s))
+    .sort((a, b) => a.x - b.x)
+    .map((i) => i.s)
+    .join(" ")
+    .trim();
+}
+
+/* The Approval Note cell sits between the officer email row and the "Submit this form" footer. */
+function approvalNote(items) {
+  const L = findLabel(items, "Approval Note");
+  if (!L) return "";
+  const email = findLabel(items, "Designated club officer Email address", false);
+  const footer = items.filter((i) => i.s.startsWith("Submit this form")).sort((a, b) => a.y - b.y)[0];
+  const top = email ? email.y + 6 : L.y - 20;
+  const bottom = footer ? footer.y - 6 : L.y + 20;
+  const cand = items
+    .filter((i) => i !== L && i.x > L.x + L.w + 10 && i.y > top && i.y < bottom)
+    .sort((a, b) => a.y - b.y || a.x - b.x);
+  const lines = [];
+  for (const it of cand) {
+    const last = lines[lines.length - 1];
+    if (last && Math.abs(last.y - it.y) < 3) last.parts.push(it.s);
+    else lines.push({ y: it.y, parts: [it.s] });
+  }
+  return lines.map((l) => l.parts.join(" ").trim()).filter(Boolean).join("\n");
+}
+
+function parseFormItems(items) {
+  const out = {
+    ok: false, date: "", clubName: "", clubCode: "", vendor: "", invoiceNumber: "", total: null, lines: [], approvalNote: "",
+  };
+  const headerHint = findLabel(items, "(e.g.", false) || findLabel(items, "Item(s) - Detailed Description", false);
+  const totalL = findLabel(items, "Total");
+  if (!headerHint || !totalL) return out;
+
+  out.date = valueRightOf(items, "Date");
+  out.clubName = valueRightOf(items, "Club Name");
+  out.clubCode = valueRightOf(items, "Club Code").replace(/[^0-9A-Za-z-]/g, "");
+  out.vendor = valueRightOf(items, "Pay to the order of");
+  out.invoiceNumber = valueRightOf(items, "Bill.com Invoice Number").replace(/\s+/g, "");
+  out.approvalNote = approvalNote(items);
+
+  const top = headerHint.y + 3;
+  const bottom = totalL.y - 3;
+  const boardHdr = items.filter((i) => (i.s === "Board" || i.s === "Expense?") && Math.abs(i.y - headerHint.y) < 25);
+  const descMaxX = boardHdr.length ? Math.min(...boardHdr.map((i) => i.x)) - 2 : 240;
+  const attHdr = items.find((i) => i.s === "# Attendees" && Math.abs(i.y - headerHint.y) < 25);
+  const boardMaxX = attHdr ? attHdr.x - 2 : descMaxX + 60;
+
+  // Each row has a "$" in the amount column; use those as row anchors.
+  const anchors = items
+    .filter((i) => i.s.startsWith("$") && i.y > top && i.y < bottom)
+    .sort((a, b) => a.y - b.y);
+  const rows = [];
+  for (const a of anchors) if (!rows.length || a.y - rows[rows.length - 1].y > 4) rows.push(a);
+  const gaps = rows.slice(1).map((r, k) => r.y - rows[k].y);
+  const half = gaps.length ? Math.max(6, Math.min(...gaps) / 2) : 10;
+
+  for (const r of rows) {
+    const cell = items.filter((i) => i.y > top && i.y < bottom && Math.abs(i.y - r.y) < half);
+    const desc = cell
+      .filter((i) => i.x < descMaxX && !PLACEHOLDER.test(i.s))
+      .sort((a, b) => a.y - b.y || a.x - b.x)
+      .map((i) => i.s)
+      .join(" ")
+      .trim();
+    const acct = cell.map((i) => i.s.match(/^(\d{4})\s*-/)).find(Boolean);
+    const dateItem = cell.find((i) => i.x > descMaxX && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(i.s));
+    const amtText = [r.s.replace(/^\$/, "")]
+      .concat(cell.filter((i) => i.x > r.x && i !== r).sort((a, b) => a.x - b.x).map((i) => i.s))
+      .join("");
+    const amount = parseAmount(amtText);
+    const boardItem = cell.find((i) => i.x > descMaxX - 5 && i.x < boardMaxX && /^(yes|no)$/i.test(i.s));
+    if (!desc && amount == null) continue;
+    out.lines.push({
+      description: desc, account: acct ? acct[1] : "", date: dateItem ? dateItem.s : "", amount,
+      board: boardItem ? (/^y/i.test(boardItem.s) ? "Yes" : "No") : "",
+    });
+  }
+
+  const totalRow = items.filter((i) => Math.abs(i.y - totalL.y) < 6 && i.x > totalL.x + totalL.w);
+  out.total = parseAmount(totalRow.sort((a, b) => a.x - b.x).map((i) => i.s).join(""));
+  out.ok = !!(out.vendor || out.invoiceNumber || out.lines.length);
+  return out;
+}
+
+/* Read a PDF (bytes) → form fields + per-page receipt text. */
+async function readPacket(pdfjs, bytes) {
+  // verbosity 0 = errors only; hides pdf.js's harmless "fake worker" and font-hinting ("TT:") warnings
+  const doc = await pdfjs.getDocument({ data: bytes.slice(), isEvalSupported: false, verbosity: 0 }).promise;
+  const pages = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    const items = await pageItems(await doc.getPage(p));
+    pages.push({ items, text: items.map((i) => i.s).join(" ") });
+  }
+  let formIndex = pages.findIndex((pg) => FORM_TITLE.test(pg.text));
+  const form = formIndex >= 0 ? parseFormItems(pages[formIndex].items) : { ok: false, lines: [] };
+  const receipts = pages
+    .map((pg, i) => ({ page: i + 1, text: pg.text, imageOnly: pg.text.replace(/\s/g, "").length < 30 }))
+    .filter((pg, i) => i !== formIndex);
+  return { numPages: doc.numPages, formPage: formIndex + 1, form, receipts };
+}
+
+/* Does a line amount appear in the text receipts? */
+function receiptMatch(amount, receipts) {
+  if (amount == null) return { status: "none" };
+  const fixed = amount.toFixed(2);
+  const withCommas = Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const forms = Array.from(new Set([fixed, withCommas])).map((f) => f.replace(/\./g, "\\."));
+  const re = new RegExp("(^|[^0-9.,])(" + forms.join("|") + ")(?![0-9])");
+  const hits = receipts.filter((r) => !r.imageOnly && re.test(r.text));
+  if (hits.length) {
+    const notReceipt = hits.every((h) => /not a payment receipt/i.test(h.text));
+    return { status: notReceipt ? "summary" : "found", pages: hits.map((h) => h.page) };
+  }
+  return { status: receipts.some((r) => r.imageOnly) ? "image" : "missing" };
+}
+
+/* Run every check. Returns [{level: good|warn|bad|info, text}] */
+function runChecks(state, read, today) {
+  const c = [];
+  const L = state.lines;
+  if (read && read.form && read.form.ok) c.push({ level: "good", text: `Read the WGA form on page ${read.formPage}` });
+  else c.push({ level: "bad", text: "Couldn't read a WGA form in this PDF. Fill in the fields below by hand." });
+
+  if (!state.vendor.trim()) c.push({ level: "bad", text: "Vendor (Pay to the order of) is blank" });
+  if (!state.invoiceNumber.trim()) c.push({ level: "bad", text: "Bill.com invoice number is blank" });
+  if (!state.clubCode.trim()) c.push({ level: "bad", text: "Club is blank. Pick it from the list." });
+  else if (!findClub(state.clubCode, state.clubName)) c.push({ level: "warn", text: `Club code ${state.clubCode} isn't on the WGA club list` });
+  if (!L.length) c.push({ level: "bad", text: "No expense lines yet" });
+  if (!String(state.approvalNote || "").trim()) c.push({ level: "bad", text: "Approval note is blank. Get it from the club officer who approved the expense." });
+  else c.push({ level: "good", text: "Approval note filled in" });
+
+  L.forEach((ln, i) => {
+    const n = `Line ${i + 1}`;
+    if (!ln.description.trim()) c.push({ level: "bad", text: `${n} has no description` });
+    if (!ln.account) c.push({ level: "bad", text: `${n} needs an account. Pick it from the list.` });
+    else if (!findAccount(ln.account)) c.push({ level: "bad", text: `${n}: account ${ln.account} isn't on the WGA account list` });
+    if (!(ln.amount > 0)) c.push({ level: "bad", text: `${n} has no amount` });
+  });
+
+  // Board Expense? on the form vs. the kind of account chosen
+  const mismatch = L.map((ln, i) => ({ ln, i, a: findAccount(ln.account) }))
+    .filter(({ ln, a }) => a && ln.board && (ln.board === "Yes") !== a.board);
+  if (mismatch.length) {
+    const nums = mismatch.map((m) => m.i + 1).join(", ");
+    const one = mismatch.length === 1;
+    c.push({ level: "warn", text: `Line${one ? "" : "s"} ${nums}: the form's Board Expense? answer doesn't match the account type (a board account like 6281 should go with "Yes")` });
+  }
+
+  const sum = Math.round(L.reduce((s, l) => s + (Number(l.amount) || 0), 0) * 100) / 100;
+  if (state.formTotal != null && L.length) {
+    if (Math.abs(sum - state.formTotal) < 0.005) c.push({ level: "good", text: `Lines add up to the form total (${money(sum)})` });
+    else c.push({ level: "bad", text: `Lines add up to ${money(sum)}, but the form total is ${money(state.formTotal)}` });
+  }
+
+  const fd = parseUSDate(state.formDate);
+  if (fd && fd > today) {
+    c.push({ level: "warn", text: `Form date ${state.formDate} is in the future, probably a typo. Check that the invoice number doesn't carry the same typo.` });
+  }
+
+  if (read && read.receipts && read.receipts.length) {
+    const imgPages = read.receipts.filter((r) => r.imageOnly).map((r) => r.page);
+    L.forEach((ln, i) => {
+      if (!(ln.amount > 0)) return;
+      const m = receiptMatch(ln.amount, read.receipts);
+      const n = `Line ${i + 1} (${money(ln.amount)})`;
+      if (m.status === "found") c.push({ level: "good", text: `${n}: matching amount on receipt page ${m.pages.join(", ")}` });
+      else if (m.status === "summary") c.push({ level: "warn", text: `${n}: the matching page says it is not a payment receipt (page ${m.pages.join(", ")})` });
+      else if (m.status === "image") c.push({ level: "info", text: `${n}: not found in text receipts. Check the photo receipt${imgPages.length > 1 ? "s" : ""} by eye (page ${imgPages.join(", ")}).` });
+      else c.push({ level: "bad", text: `${n}: no receipt in this PDF shows this amount` });
+    });
+  } else if (read) {
+    c.push({ level: "warn", text: "No receipt pages found after the form" });
+  }
+  return c;
+}
+
+/* ---- cover page with pdf-lib ---- */
+function fmtDate(iso) { // "2026-10-26" -> "10/26/2026"
+  const [y, m, d] = iso.split("-");
+  return `${m}/${d}/${y}`;
+}
+
+async function buildPacket(PDFLib, srcBytes, state) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const out = await PDFDocument.create();
+  const reg = await out.embedFont(StandardFonts.Helvetica);
+  const bold = await out.embedFont(StandardFonts.HelveticaBold);
+  const safe = (font, s) => Array.from(String(s ?? "").replace(/[\r\n\t]+/g, " ")).map((ch) => {
+    try { font.encodeText(ch); return ch; } catch (e) { return "?"; }
+  }).join("");
+  const wrap = (font, size, s, maxW) => {
+    const words = safe(font, s).split(/\s+/).filter(Boolean);
+    const lines = []; let cur = "";
+    for (const w of words) {
+      const t = cur ? cur + " " + w : w;
+      if (font.widthOfTextAtSize(t, size) <= maxW || !cur) cur = t; else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [""];
+  };
+
+  const W = 612, H = 792, M = 57.6;
+  const ink = rgb(0, 0, 0), grey = rgb(0.45, 0.45, 0.45), rule = rgb(0.73, 0.73, 0.73), fill = rgb(0.91, 0.91, 0.91);
+  let page = out.addPage([W, H]);
+  let y = H - M;
+  const text = (s, x, yy, font, size, color = ink) => page.drawText(safe(font, s), { x, y: yy, size, font, color });
+
+  // Title
+  y -= 20;
+  text("SUMMARIZED INVOICE FOR BILL.COM UPLOAD", M, y, bold, 20);
+  y -= 34;
+
+  // Header block: left = Vendor / Bill To, right = Invoice Number / Invoice Date / Due Date
+  const LX = M, LV = M + 65, RX = 316, RV = 410, size = 11, lh = 15;
+  const billTo = `Wharton Graduate Association – ${state.clubName || "Club"} (Club ${state.clubCode})`;
+  const rowsL = [["Vendor", [state.vendor]], ["Bill To", wrap(reg, size, billTo, RX - LV - 12)]];
+  const rowsR = [["Invoice Number", [state.invoiceNumber]], ["Invoice Date", [fmtDate(state.invoiceDate)]], ["Due Date", [fmtDate(state.invoiceDate)]]];
+  let yl = y, yr = y;
+  for (const [lab, vals] of rowsL) {
+    text(lab, LX, yl, bold, size);
+    vals.forEach((v, k) => text(v, LV, yl - k * lh, reg, size));
+    yl -= Math.max(1, vals.length) * lh + 14;
+  }
+  for (const [lab, vals] of rowsR) {
+    text(lab, RX, yr, bold, size);
+    vals.forEach((v, k) => text(v, RV, yr - k * lh, reg, size));
+    yr -= lh + 14;
+  }
+  y = Math.min(yl, yr) - 4;
+
+  // Bill description
+  text("Bill Description", M, y, bold, size);
+  const bd = wrap(reg, size, state.billDescription, W - M - (M + 105));
+  bd.forEach((v, k) => text(v, M + 105, y - k * lh, reg, size));
+  y -= bd.length * lh + 10;
+
+  // Notes (the form's Approval Note), kept line by line
+  const noteLines = String(state.approvalNote || "").split(/\n+/).map((s) => s.trim()).filter(Boolean)
+    .flatMap((ln) => wrap(reg, size, ln, W - M - (M + 105)));
+  if (noteLines.length) {
+    text("Notes", M, y, bold, size);
+    noteLines.forEach((v, k) => text(v, M + 105, y - k * lh, reg, size));
+    y -= noteLines.length * lh + 20;
+  } else {
+    y -= 10;
+  }
+
+  // Line table
+  const cols = { desc: M, acct: M + 222, cls: M + 372, amtR: W - M - 6 };
+  const descW = cols.acct - cols.desc - 14, fs = 10, rowPad = 7, rowLH = 13;
+  const header = () => {
+    page.drawRectangle({ x: M, y: y - 8, width: W - 2 * M, height: 24, color: fill });
+    text("Description", cols.desc + 6, y, bold, fs);
+    text("Account", cols.acct, y, bold, fs);
+    text("Class", cols.cls, y, bold, fs);
+    const t = "Amount"; text(t, cols.amtR - bold.widthOfTextAtSize(t, fs), y, bold, fs);
+    y -= 8 + rowPad + 10;
+  };
+  header();
+  for (const ln of state.lines) {
+    const dl = wrap(reg, fs, ln.description, descW);
+    const h = dl.length * rowLH + 2 * rowPad - 3;
+    if (y - h < M + 40) { page = out.addPage([W, H]); y = H - M - 10; header(); }
+    dl.forEach((v, k) => text(v, cols.desc + 6, y - k * rowLH, reg, fs));
+    text(ln.account, cols.acct, y, reg, fs);
+    text(state.clubCode, cols.cls, y, reg, fs);
+    const a = money(ln.amount); text(a, cols.amtR - reg.widthOfTextAtSize(a, fs), y, reg, fs);
+    const by = y - (dl.length - 1) * rowLH - rowPad - 1;
+    page.drawLine({ start: { x: M, y: by }, end: { x: W - M, y: by }, thickness: 0.5, color: rule });
+    y = by - rowPad - 9;
+  }
+  const sum = state.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  page.drawLine({ start: { x: M, y: y + 9 + rowPad - 1 }, end: { x: W - M, y: y + 9 + rowPad - 1 }, thickness: 1.2, color: ink });
+  text("Total", cols.desc + 6, y - 2, bold, fs);
+  const ts = money(sum); text(ts, cols.amtR - bold.widthOfTextAtSize(ts, fs), y - 2, bold, fs);
+  y -= 34;
+  text("Supporting documents (SBC Reimbursement / Invoice Form and itemized receipts) are attached.", M, y, reg, 9, grey);
+
+  // Then every original page, in the original order (form first, then receipts).
+  const src = await PDFDocument.load(srcBytes, { ignoreEncryption: true });
+  const copied = await out.copyPages(src, src.getPageIndices());
+  copied.forEach((p) => out.addPage(p));
+  out.setTitle(`${state.invoiceNumber} ${state.vendor}`.trim());
+  return await out.save();
+}
+
+function packetFilename(invoiceNumber) {
+  const base = String(invoiceNumber || "bill").replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim() || "bill";
+  return base + ".pdf";
+}
+/* ---- end core ---- */
+
+
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const pad = (n) => String(n).padStart(2, "0");
+  const todayISO = () => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
+  const startOfToday = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+
+  // Inside the shared page, saving goes through the viewer's save prompt; a local copy uses a normal download.
+  const downloadsReady = (window.claude && typeof window.claude.use === "function")
+    ? window.claude.use("downloads").catch(() => null)
+    : Promise.resolve(null);
+
+  // Standard approval note for the Analytics club (Class 461). Other clubs use the note on their form.
+  const ANALYTICS_NOTE = "I approve this expense on behalf of my club / conference and our VP of Finance, Esther Li, li717@wharton.upenn.edu.";
+
+  // In a shared view where saving isn't granted, say so up front instead of after the click.
+  const inViewer = !!(window.claude && typeof window.claude.use === "function");
+  let saveUnavailable = false;
+  downloadsReady.then((dl) => {
+    if (!dl && inViewer) { saveUnavailable = true; $("viewNote").hidden = false; refresh(); }
+  });
+
+  let S = null; // working state
+  let READ = null;
+
+  function setStep(n) {
+    document.querySelectorAll("#steps li").forEach((li) => {
+      const k = Number(li.dataset.step);
+      li.classList.toggle("now", k === n);
+      li.classList.toggle("done", k < n);
+    });
+  }
+
+  function libs() {
+    const pdfjs = window.pdfjsLib, lib = window.PDFLib;
+    if (!pdfjs || !lib) throw new Error("libs");
+    if (pdfjs.GlobalWorkerOptions && !pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+    return { pdfjs, lib };
+  }
+
+  function dropMessage(title, sub, busy) {
+    $("dropTitle").textContent = title;
+    $("dropSub").textContent = sub;
+    $("drop").classList.toggle("busy", !!busy);
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") {
+      dropMessage("That isn't a PDF", "Choose the PDF the member sent, with the SBC form and receipts.");
+      return;
+    }
+    dropMessage("Reading " + file.name + "…", "This takes a few seconds for long receipt packets.", true);
+    let bytes;
+    try {
+      bytes = new Uint8Array(await file.arrayBuffer());
+      const { pdfjs } = libs();
+      READ = await readPacket(pdfjs, bytes);
+    } catch (e) {
+      if (e && e.message === "libs") dropMessage("The PDF tools didn't load", "Check your internet connection, then reload this page.");
+      else dropMessage("Couldn't open this PDF", "It may be password-protected or damaged. Ask the member to re-export it from Excel.");
+      return;
+    }
+    const f = READ.form || {};
+    S = {
+      fileName: file.name, bytes,
+      vendor: f.vendor || "", invoiceNumber: f.invoiceNumber || "", clubCode: f.clubCode || "", clubName: f.clubName || "",
+      formDate: f.date || "", formTotal: f.total ?? null, invoiceDate: todayISO(), billDescription: "",
+      approvalNote: (String(f.clubCode || "").trim() === "461" ? ANALYTICS_NOTE : f.approvalNote) || "",
+      formClub: { code: f.clubCode || "", name: f.clubName || "" },
+      lines: (f.lines && f.lines.length ? f.lines : [{ description: "", account: "", amount: null }])
+        .map((l) => ({ description: l.description || "", account: l.account || "", amount: l.amount ?? null, board: l.board || "" })),
+    };
+    showReview();
+  }
+
+  function showReview() {
+    $("intake").hidden = true;
+    $("review").hidden = false;
+    $("next").hidden = true;
+    $("dlMsg").hidden = true;
+    $("sumFile").textContent = S.fileName;
+    const meta = [`${READ.numPages} page${READ.numPages === 1 ? "" : "s"}`];
+    if (READ.formPage > 0) meta.push(`form on page ${READ.formPage}`);
+    if (S.formTotal != null) meta.push(`form total ${money(S.formTotal)}`);
+    $("sumMeta").textContent = meta.join(" · ");
+    $("vendor").value = S.vendor; $("invNum").value = S.invoiceNumber; fillClubSelect();
+    $("invDate").value = S.invoiceDate; $("billDesc").value = S.billDescription;
+    $("apprNote").value = S.approvalNote;
+    $("formTotalNote").textContent = S.formTotal != null ? `Form total ${money(S.formTotal)}` : "";
+    renderLines();
+    refresh();
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderLines() {
+    const body = $("lineBody");
+    body.textContent = "";
+    S.lines.forEach((ln, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="n">${i + 1}</td>
+        <td><input type="text" id="ld${i}" aria-label="Line ${i + 1} description"></td>
+        <td class="acct"><select id="la${i}" aria-label="Line ${i + 1} account"></select></td>
+        <td class="amt"><input type="text" id="lm${i}" class="mono" inputmode="decimal" aria-label="Line ${i + 1} amount" placeholder="0.00"></td>
+        <td class="x"><button class="xbtn" type="button" aria-label="Remove line ${i + 1}">&times;</button></td>`;
+      body.appendChild(tr);
+      const d = tr.querySelector(`#ld${i}`), a = tr.querySelector(`#la${i}`), m = tr.querySelector(`#lm${i}`);
+      fillAccountSelect(a, ln.account);
+      d.value = ln.description; m.value = ln.amount != null ? ln.amount.toFixed(2) : "";
+      d.addEventListener("input", () => { ln.description = d.value; refresh(); });
+      a.addEventListener("change", () => { ln.account = a.value; refresh(); });
+      m.addEventListener("input", () => { ln.amount = parseAmount(m.value); refresh(); });
+      m.addEventListener("blur", () => { if (ln.amount != null) m.value = ln.amount.toFixed(2); });
+      tr.querySelector(".xbtn").addEventListener("click", () => { S.lines.splice(i, 1); renderLines(); refresh(); });
+    });
+  }
+
+  function option(parent, value, label) {
+    const o = document.createElement("option");
+    o.value = value; o.textContent = label; parent.appendChild(o); return o;
+  }
+
+  function fillAccountSelect(sel, current) {
+    sel.textContent = "";
+    option(sel, "", "Choose an account…");
+    if (current && !findAccount(current)) option(sel, current, `${current} (from the form, not on the WGA list)`);
+    for (const [label, board] of [["Club expenses", false], ["Board expenses", true]]) {
+      const g = document.createElement("optgroup"); g.label = label;
+      WGA_ACCOUNTS.filter((x) => x.board === board).forEach((x) => option(g, x.code, `${x.code} - ${x.name}`));
+      sel.appendChild(g);
+    }
+    sel.value = current || "";
+  }
+
+  function fillClubSelect() {
+    const sel = $("club");
+    sel.textContent = "";
+    option(sel, "", "Choose the club…");
+    const match = findClub(S.clubCode, S.clubName);
+    if (!match && S.clubCode) option(sel, "form", `${S.clubName || "Club"} (${S.clubCode}), from the form`);
+    WGA_CLUBS.forEach((c, i) => option(sel, String(i), `${c.name} (${c.code})`));
+    if (match) { S.clubCode = match.code; S.clubName = match.name; sel.value = String(WGA_CLUBS.indexOf(match)); }
+    else sel.value = S.clubCode ? "form" : "";
+  }
+
+  const ORDER = { bad: 0, warn: 1, info: 2, good: 3 };
+  const ICON = { bad: "!", warn: "!", info: "?", good: "✓" };
+
+  function refresh() {
+    if (!S) return;
+    const checks = runChecks(S, READ, startOfToday()).sort((a, b) => ORDER[a.level] - ORDER[b.level]);
+    const ul = $("checks");
+    ul.textContent = "";
+    for (const c of checks) {
+      const li = document.createElement("li");
+      li.className = c.level;
+      const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = ICON[c.level]; ic.setAttribute("aria-hidden", "true");
+      const tx = document.createElement("span"); tx.textContent = c.text;
+      li.append(ic, tx); ul.appendChild(li);
+    }
+    const bad = checks.filter((c) => c.level === "bad").length;
+    const warn = checks.filter((c) => c.level === "warn").length;
+    const pill = $("sumPill");
+    pill.className = "pill " + (bad ? "bad" : warn ? "warn" : "good");
+    $("sumPillText").textContent = bad ? `${bad} to fix` + (warn ? `, ${warn} to look at` : "") : warn ? `${warn} worth a look` : "Ready";
+
+    // field highlighting
+    $("vendor").classList.toggle("invalid", !S.vendor.trim());
+    $("invNum").classList.toggle("invalid", !S.invoiceNumber.trim());
+    $("club").classList.toggle("invalid", !S.clubCode.trim());
+    $("apprNote").classList.toggle("invalid", !S.approvalNote.trim());
+    S.lines.forEach((ln, i) => {
+      const a = $(`la${i}`), m = $(`lm${i}`), d = $(`ld${i}`);
+      if (a) a.classList.toggle("invalid", !findAccount(ln.account));
+      if (m) m.classList.toggle("invalid", !(ln.amount > 0));
+      if (d) d.classList.toggle("invalid", !ln.description.trim());
+    });
+    const sum = S.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+    $("lineSum").textContent = money(sum);
+    $("classEcho").textContent = S.clubCode || "—";
+
+    // download gate
+    const name = packetFilename(S.invoiceNumber);
+    $("dlName").textContent = name;
+    const needs = [];
+    if (!S.billDescription.trim()) needs.push("a bill description");
+    if (!S.approvalNote.trim()) needs.push("an approval note");
+    if (!S.vendor.trim()) needs.push("the vendor");
+    if (!S.invoiceNumber.trim()) needs.push("the invoice number");
+    if (!S.invoiceDate) needs.push("a date");
+    if (!S.lines.length) needs.push("at least one expense line");
+    $("dlBtn").disabled = needs.length > 0 || saveUnavailable;
+    $("dlWhy").textContent = saveUnavailable
+      ? "Saving isn't available in this view. Use the website version linked at the top of the page."
+      : needs.length
+      ? `Add ${needs.join(", ").replace(/, ([^,]*)$/, " and $1")} to download.`
+      : bad ? "You can download now, but fix the red items first so Bill.com gets the right values." : "Bill.com will read page 1 of this file. The member's form and receipts follow it.";
+  }
+
+  function bind(id, key, ev = "input") {
+    $(id).addEventListener(ev, () => { S[key] = $(id).value; refresh(); });
+  }
+  bind("vendor", "vendor"); bind("invNum", "invoiceNumber");
+  $("club").addEventListener("change", () => {
+    const v = $("club").value;
+    if (v === "") { S.clubCode = ""; S.clubName = ""; }
+    else if (v === "form") { S.clubCode = S.formClub.code; S.clubName = S.formClub.name; }
+    else { const c = WGA_CLUBS[Number(v)]; S.clubCode = c.code; S.clubName = c.name; }
+    if (S.clubCode === "461" && !S.approvalNote.trim()) { S.approvalNote = ANALYTICS_NOTE; $("apprNote").value = S.approvalNote; }
+    refresh();
+  });
+  bind("invDate", "invoiceDate", "change"); bind("billDesc", "billDescription"); bind("apprNote", "approvalNote");
+  $("invDate").addEventListener("input", () => { S.invoiceDate = $("invDate").value; refresh(); });
+
+  $("addLine").addEventListener("click", () => {
+    S.lines.push({ description: "", account: "", amount: null });
+    renderLines(); refresh();
+    const d = $(`ld${S.lines.length - 1}`); if (d) d.focus();
+  });
+
+  function showMsg(kind, text) {
+    const el = $("dlMsg");
+    el.className = "msg " + kind; el.textContent = text; el.hidden = false;
+  }
+
+  $("dlBtn").addEventListener("click", async () => {
+    const btn = $("dlBtn");
+    btn.disabled = true;
+    const name = packetFilename(S.invoiceNumber);
+    let bytes;
+    try {
+      const { lib } = libs();
+      const clean = { ...S, approvalNote: S.approvalNote.trim(), lines: S.lines.map((l) => ({ ...l, description: l.description.trim() })) };
+      bytes = await buildPacket(lib, S.bytes, clean);
+    } catch (e) {
+      showMsg("bad", e && e.message === "libs"
+        ? "The PDF tools didn't load. Check your internet connection, then reload this page."
+        : "Couldn't build the PDF from this file. Try re-exporting the member's PDF and adding it again.");
+      btn.disabled = false; return;
+    }
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const dl = await downloadsReady;
+    let done = false;
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); done = true; showMsg("good", `Saved ${name}.`); }
+      catch (e) {
+        const code = e && e.code;
+        if (code === "declined") showMsg("info", "Download cancelled. Click Download PDF to try again.");
+        else if (code === "rate_limited") showMsg("info", "A save prompt is already open. Finish that one first.");
+        else showMsg("bad", "This view can't save files. Use the website version: samantha-flaim.github.io/billcom-upload-prep");
+      }
+    } else if (inViewer) {
+      // Inside the shared page but saving isn't available in this view; a plain link download would be blocked silently.
+      showMsg("bad", "This view can't save files. Use the website version: samantha-flaim.github.io/billcom-upload-prep");
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      done = true; showMsg("good", `Downloaded ${name}. Check your Downloads folder.`);
+    }
+    btn.disabled = false;
+    if (done) {
+      $("nextName").textContent = name;
+      $("copySrc").value = S.billDescription.trim();
+      $("copyNote").value = S.approvalNote.trim();
+      $("next").hidden = false;
+      setStep(3);
+      $("next").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+
+  document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", () => {
+    const src = $(b.dataset.copy);
+    const ok = () => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1600); };
+    const fallback = () => { src.focus(); src.select(); try { document.execCommand("copy") && ok(); } catch (e) { b.textContent = "Press Ctrl/Cmd+C"; } };
+    try {
+      navigator.clipboard.writeText(src.value).then(ok, fallback);
+    } catch (e) { fallback(); }
+  }));
+
+  $("restart").addEventListener("click", () => {
+    S = null; READ = null; $("file").value = "";
+    $("review").hidden = true; $("intake").hidden = false;
+    dropMessage("Drop the member's PDF here", "The SBC form plus receipts, as one PDF.");
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // file intake
+  $("file").addEventListener("change", (e) => handleFile(e.target.files[0]));
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "dragend"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", (e) => {
+    e.preventDefault(); drop.classList.remove("over");
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    handleFile(f);
+  });
+  // let a whole-window drop work too, without the browser opening the PDF
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("drop", (e) => { if (!drop.contains(e.target)) { e.preventDefault(); if (!$("intake").hidden) handleFile(e.dataTransfer.files[0]); } });
+})();
+</script>
+
+</body>
+</html>
