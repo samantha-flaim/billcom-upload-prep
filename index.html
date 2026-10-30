@@ -793,6 +793,17 @@ function runChecks(state, read, today) {
     if (!(ln.amount > 0)) c.push({ level: "bad", text: `${n} has no amount` });
   });
 
+  // Fields the member left blank on the form (they don't change what Bill.com fills in)
+  const fd0 = parseUSDate(state.formDate);
+  if (read && read.form && read.form.ok && (!String(state.formDate || "").trim() || (fd0 && fd0.getFullYear() < 2000))) {
+    c.push({ level: "warn", text: "The form's Date is blank. Ask the member to fill it in (the invoice number may be built from it)." });
+  }
+  const listNums = (arr) => (arr.length === 1 ? `Line ${arr[0]}` : `Lines ${arr.join(", ")}`);
+  const noDate = L.map((ln, i) => (ln.fromForm && !String(ln.date || "").trim() ? i + 1 : 0)).filter(Boolean);
+  if (noDate.length) c.push({ level: "warn", text: `${listNums(noDate)}: Date of Expense is blank on the form` });
+  const noBoard = L.map((ln, i) => (ln.fromForm && !ln.board ? i + 1 : 0)).filter(Boolean);
+  if (noBoard.length) c.push({ level: "warn", text: `${listNums(noBoard)}: Board Expense? (Yes or No) is blank on the form` });
+
   // Board Expense? on the form vs. the kind of account chosen
   const mismatch = L.map((ln, i) => ({ ln, i, a: findAccount(ln.account) }))
     .filter(({ ln, a }) => a && ln.board && (ln.board === "Yes") !== a.board);
@@ -1018,7 +1029,8 @@ function packetFilename(invoiceNumber) {
       approvalNote: (String(f.clubCode || "").trim() === "461" ? ANALYTICS_NOTE : f.approvalNote) || "",
       formClub: { code: f.clubCode || "", name: f.clubName || "" },
       lines: (f.lines && f.lines.length ? f.lines : [{ description: "", account: "", amount: null }])
-        .map((l) => ({ description: l.description || "", account: l.account || "", amount: l.amount ?? null, board: l.board || "" })),
+        .map((l) => ({ description: l.description || "", account: l.account || "", amount: l.amount ?? null, board: l.board || "",
+          date: l.date || "", fromForm: !!(f.lines && f.lines.length) })),
     };
     showReview();
   }
