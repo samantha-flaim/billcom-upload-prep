@@ -286,12 +286,12 @@ footer { margin-top: 32px; font-size: 12px; color: var(--muted); display: grid; 
         <div class="field">
           <label for="billDesc">Bill description <span class="req" aria-hidden="true">*</span><span class="muted" style="font-weight:400"> (required)</span></label>
           <input type="text" id="billDesc" maxlength="200" placeholder="e.g. WHALASA BBQ Event Supplies" autocomplete="off">
-          <span class="hint">A short name for the whole bill. It goes on the summary page, and you'll paste it into Bill.com's Bill description field.</span>
+          <span class="hint">A short name for the whole bill. It goes on the summary page as Bill description.</span>
         </div>
         <div class="field">
           <label for="apprNote">Approval note <span class="req" aria-hidden="true">*</span><span class="muted" style="font-weight:400"> (required)</span></label>
           <textarea id="apprNote" rows="2" maxlength="500" placeholder="I approve this expense on behalf of my club / conference.&#10;Name, Title, email@wharton.upenn.edu, Club"></textarea>
-          <span class="hint">Analytics (461) uses its standard note; other clubs get the Approval Note from their form. It goes on the summary page as Notes, for Bill.com's Notes on this bill.</span>
+          <span class="hint">Analytics (461) uses its standard note; other clubs get the Approval Note from their form. It goes on the summary page as Notes on this bill.</span>
         </div>
       </div>
 
@@ -841,10 +841,21 @@ function runChecks(state, read, today) {
   return c;
 }
 
-/* ---- cover page with pdf-lib ---- */
+/* ---- the one-page summary Bill.com reads (pdf-lib) ----
+   Plain "Label: value" lines using Bill.com's own field names, then an Expenses
+   table whose columns match Bill.com's (Account, Amount, Description, Class).
+   No boxes, fills or total row, so nothing else reads as a field or a line item. */
 function fmtDate(iso) { // "2026-10-26" -> "10/26/2026"
   const [y, m, d] = iso.split("-");
   return `${m}/${d}/${y}`;
+}
+
+// Bill.com's Class names. Analytics is confirmed from Bill.com; other clubs fall back to the code.
+const BILLCOM_CLASS = { "461": "461-Wharton Analytics" };
+function billcomClass(code) { const c = String(code || "").trim(); return BILLCOM_CLASS[c] || c; }
+
+function plainAmount(n) {
+  return (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 async function buildPacket(PDFLib, srcBytes, state) {
@@ -866,87 +877,62 @@ async function buildPacket(PDFLib, srcBytes, state) {
     return lines.length ? lines : [""];
   };
 
-  const W = 612, H = 792, M = 57.6;
-  const ink = rgb(0, 0, 0), grey = rgb(0.45, 0.45, 0.45), rule = rgb(0.73, 0.73, 0.73), fill = rgb(0.91, 0.91, 0.91);
+  const W = 612, H = 792, M = 57.6, ink = rgb(0, 0, 0);
   let page = out.addPage([W, H]);
-  let y = H - M;
-  const text = (s, x, yy, font, size, color = ink) => page.drawText(safe(font, s), { x, y: yy, size, font, color });
+  let y = H - M - 16;
+  const text = (s, x, yy, font, size) => page.drawText(safe(font, s), { x, y: yy, size, font, color: ink });
+  const newPageIfNeeded = (need) => { if (y - need < M) { page = out.addPage([W, H]); y = H - M - 16; } };
 
-  // Title
-  y -= 20;
-  text("SUMMARIZED INVOICE FOR BILL.COM UPLOAD", M, y, bold, 20);
+  text("SUMMARIZED INVOICE FOR BILL.COM UPLOAD", M, y, bold, 16);
   y -= 34;
 
-  // Header block: left = Vendor / Bill To, right = Invoice Number / Invoice Date / Due Date
-  const LX = M, LV = M + 65, RX = 316, RV = 410, size = 11, lh = 15;
-  const billTo = `Wharton Graduate Association – ${state.clubName || "Club"} (Club ${state.clubCode})`;
-  const rowsL = [["Vendor", [state.vendor]], ["Bill To", wrap(reg, size, billTo, RX - LV - 12)]];
-  const rowsR = [["Invoice Number", [state.invoiceNumber]], ["Invoice Date", [fmtDate(state.invoiceDate)]], ["Due Date", [fmtDate(state.invoiceDate)]]];
-  let yl = y, yr = y;
-  for (const [lab, vals] of rowsL) {
-    text(lab, LX, yl, bold, size);
-    vals.forEach((v, k) => text(v, LV, yl - k * lh, reg, size));
-    yl -= Math.max(1, vals.length) * lh + 14;
-  }
-  for (const [lab, vals] of rowsR) {
-    text(lab, RX, yr, bold, size);
-    vals.forEach((v, k) => text(v, RV, yr - k * lh, reg, size));
-    yr -= lh + 14;
-  }
-  y = Math.min(yl, yr) - 4;
-
-  // Bill description
-  text("Bill Description", M, y, bold, size);
-  const bd = wrap(reg, size, state.billDescription, W - M - (M + 105));
-  bd.forEach((v, k) => text(v, M + 105, y - k * lh, reg, size));
-  y -= bd.length * lh + 10;
-
-  // Notes (the form's Approval Note), kept line by line
-  const noteLines = String(state.approvalNote || "").split(/\n+/).map((s) => s.trim()).filter(Boolean)
-    .flatMap((ln) => wrap(reg, size, ln, W - M - (M + 105)));
-  if (noteLines.length) {
-    text("Notes", M, y, bold, size);
-    noteLines.forEach((v, k) => text(v, M + 105, y - k * lh, reg, size));
-    y -= noteLines.length * lh + 20;
-  } else {
-    y -= 10;
+  // Bill fields, in Bill.com's order and with its labels
+  const size = 11, lh = 15, VX = M + 130, VW = W - M - VX;
+  const total = state.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  const fields = [
+    ["Vendor:", state.vendor],
+    ["Invoice number:", state.invoiceNumber],
+    ["Invoice date:", fmtDate(state.invoiceDate)],
+    ["Due date:", fmtDate(state.invoiceDate)],
+    ["Amount:", "USD " + plainAmount(total)],
+    ["Bill description:", state.billDescription],
+    ["Notes on this bill:", String(state.approvalNote || "").replace(/\s*\n\s*/g, " ").trim()],
+  ];
+  for (const [label, value] of fields) {
+    if (!String(value || "").trim()) continue;
+    const vl = wrap(reg, size, value, VW);
+    newPageIfNeeded(vl.length * lh);
+    text(label, M, y, bold, size);
+    vl.forEach((v, k) => text(v, VX, y - k * lh, reg, size));
+    y -= vl.length * lh + 8;
   }
 
-  // Line table
-  const cols = { desc: M, acct: M + 222, cls: M + 372, amtR: W - M - 6 };
-  const descW = cols.acct - cols.desc - 14, fs = 10, rowPad = 7, rowLH = 13;
+  // Expenses, one row per line, columns in Bill.com's order
+  y -= 14;
+  const fs = 10, rl = 13;
+  const C = { acct: M, amt: M + 70, desc: M + 150, cls: M + 370 };
+  const descW = C.cls - C.desc - 14, clsW = W - M - C.cls;
   const header = () => {
-    page.drawRectangle({ x: M, y: y - 8, width: W - 2 * M, height: 24, color: fill });
-    text("Description", cols.desc + 6, y, bold, fs);
-    text("Account", cols.acct, y, bold, fs);
-    text("Class", cols.cls, y, bold, fs);
-    const t = "Amount"; text(t, cols.amtR - bold.widthOfTextAtSize(t, fs), y, bold, fs);
-    y -= 8 + rowPad + 10;
+    text("Expenses", M, y, bold, 12); y -= 20;
+    text("Account", C.acct, y, bold, fs); text("Amount", C.amt, y, bold, fs);
+    text("Description", C.desc, y, bold, fs); text("Class", C.cls, y, bold, fs);
+    y -= 18;
   };
+  newPageIfNeeded(60);
   header();
+  const cls = billcomClass(state.clubCode);
   for (const ln of state.lines) {
     const dl = wrap(reg, fs, ln.description, descW);
-    const h = dl.length * rowLH + 2 * rowPad - 3;
-    if (y - h < M + 40) { page = out.addPage([W, H]); y = H - M - 10; header(); }
-    dl.forEach((v, k) => text(v, cols.desc + 6, y - k * rowLH, reg, fs));
-    text(ln.account, cols.acct, y, reg, fs);
-    text(state.clubCode, cols.cls, y, reg, fs);
-    const a = money(ln.amount); text(a, cols.amtR - reg.widthOfTextAtSize(a, fs), y, reg, fs);
-    const by = y - (dl.length - 1) * rowLH - rowPad - 1;
-    page.drawLine({ start: { x: M, y: by }, end: { x: W - M, y: by }, thickness: 0.5, color: rule });
-    y = by - rowPad - 9;
+    const cl = wrap(reg, fs, cls, clsW);
+    const rows = Math.max(dl.length, cl.length);
+    if (y - rows * rl < M) { page = out.addPage([W, H]); y = H - M - 16; header(); }
+    text(ln.account, C.acct, y, reg, fs);
+    text(plainAmount(ln.amount), C.amt, y, reg, fs);
+    dl.forEach((v, k) => text(v, C.desc, y - k * rl, reg, fs));
+    cl.forEach((v, k) => text(v, C.cls, y - k * rl, reg, fs));
+    y -= rows * rl + 8;
   }
-  const sum = state.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
-  page.drawLine({ start: { x: M, y: y + 9 + rowPad - 1 }, end: { x: W - M, y: y + 9 + rowPad - 1 }, thickness: 1.2, color: ink });
-  text("Total", cols.desc + 6, y - 2, bold, fs);
-  const ts = money(sum); text(ts, cols.amtR - bold.widthOfTextAtSize(ts, fs), y - 2, bold, fs);
-  y -= 34;
-  text("Supporting documents (SBC Reimbursement / Invoice Form and itemized receipts) are attached.", M, y, reg, 9, grey);
 
-  // Then every original page, in the original order (form first, then receipts).
-  const src = await PDFDocument.load(srcBytes, { ignoreEncryption: true });
-  const copied = await out.copyPages(src, src.getPageIndices());
-  copied.forEach((p) => out.addPage(p));
   out.setTitle(`${state.invoiceNumber} ${state.vendor}`.trim());
   return await out.save();
 }
@@ -1156,7 +1142,7 @@ function packetFilename(invoiceNumber) {
       ? "Saving isn't available in this view. Use the website version linked at the top of the page."
       : needs.length
       ? `Add ${needs.join(", ").replace(/, ([^,]*)$/, " and $1")} to download.`
-      : bad ? "You can download now, but fix the red items first so Bill.com gets the right values." : "Bill.com will read page 1 of this file. The member's form and receipts follow it.";
+      : bad ? "You can download now, but fix the red items first so Bill.com gets the right values." : "This downloads a one-page summary for Bill.com to read. The member's form and receipts are not included.";
   }
 
   function bind(id, key, ev = "input") {
